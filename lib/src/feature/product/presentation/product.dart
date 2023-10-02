@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/src/feature/product/domain/product_item_response.dart';
+import 'package:flutter_application_1/src/feature/product/presentation/product_controller.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 // ignore: camel_case_types, must_be_immutable
-class product extends StatelessWidget {
+class Product extends StatelessWidget {
   TextEditingController dateInput = TextEditingController();
+  final productController = Get.put<ProductController>(ProductController());
 
-  product({super.key});
-  @override
+  Product({super.key});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -45,10 +48,15 @@ class product extends StatelessWidget {
                       ),
                       Expanded(
                         child: Padding(
-                          padding:
-                              const EdgeInsetsDirectional.fromSTEB(4, 0, 0, 0),
+                          padding: const EdgeInsetsDirectional.fromSTEB(4, 0, 0, 0),
                           child: TextFormField(
                             obscureText: false,
+                            onChanged: (value) {
+                              productController.productItemListDataUse.value = productController.productItemList
+                                  .where(
+                                      (e) => e.goodName.contains(value) || e.barcode.contains(value) || e.price.toString().contains(value))
+                                  .toList();
+                            },
                             decoration: const InputDecoration(
                               hintText: 'Search...',
                               enabledBorder: UnderlineInputBorder(
@@ -93,9 +101,7 @@ class product extends StatelessWidget {
                               ),
                             ),
                             style: GoogleFonts.getFont('Prompt',
-                                color: const Color.fromARGB(179, 0, 0, 0),
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600),
+                                color: const Color.fromARGB(179, 0, 0, 0), fontSize: 14, fontWeight: FontWeight.w600),
                           ),
                         ),
                       ),
@@ -105,15 +111,20 @@ class product extends StatelessWidget {
               ),
             ),
             Expanded(
-              child: ListView(
-                padding: EdgeInsets.zero,
-                shrinkWrap: true,
-                scrollDirection: Axis.vertical,
-                children: [
-                  for (var i = 0; i < 15; i++)
-                    ProductBox_Wedget()
-                ],
-              ),
+              child: Obx(() => ListView(
+                    padding: EdgeInsets.zero,
+                    shrinkWrap: true,
+                    scrollDirection: Axis.vertical,
+                    children: [
+                      for (var i = 0; i < productController.productItemListDataUse.length; i++)
+                        productController.isLoading.value
+                            ? const Center(child: CircularProgressIndicator())
+                            : ProductBox_Wedget(
+                                index: i,
+                                productItem: productController.productItemListDataUse.elementAt(i),
+                              )
+                    ],
+                  )),
             ),
           ],
         )),
@@ -123,15 +134,14 @@ class product extends StatelessWidget {
 }
 
 class ProductBox_Wedget extends StatelessWidget {
-  const ProductBox_Wedget({
-    super.key,
-  });
+  const ProductBox_Wedget({super.key, required this.index, required this.productItem});
+  final int index;
+  final ProductItem productItem;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding:
-          const EdgeInsetsDirectional.fromSTEB(16, 0, 16, 16),
+      padding: const EdgeInsetsDirectional.fromSTEB(16, 0, 16, 16),
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
@@ -146,8 +156,7 @@ class ProductBox_Wedget extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
         ),
         child: Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(
-              12, 12, 12, 12),
+          padding: const EdgeInsetsDirectional.fromSTEB(12, 12, 12, 12),
           child: Row(
             mainAxisSize: MainAxisSize.max,
             children: [
@@ -162,15 +171,13 @@ class ProductBox_Wedget extends StatelessWidget {
                     width: 2,
                   ),
                 ),
-                alignment:
-                    const AlignmentDirectional(0.00, 0.00),
+                alignment: const AlignmentDirectional(0.00, 0.00),
                 child: Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(
-                      2, 2, 2, 2),
+                  padding: const EdgeInsetsDirectional.fromSTEB(2, 2, 2, 2),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(6),
                     child: Image.network(
-                      'https://file.drugnetcenter.com/drugpos/GoodPictures/420.jpg',
+                      'https://file.drugnetcenter.com/drugpos/GoodPictures/${productItem.goodCode}.jpg',
                       width: double.infinity,
                       height: double.infinity,
                       fit: BoxFit.contain,
@@ -180,24 +187,19 @@ class ProductBox_Wedget extends StatelessWidget {
               ),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(
-                      12, 0, 0, 0),
+                  padding: const EdgeInsetsDirectional.fromSTEB(12, 0, 0, 0),
                   child: Column(
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'GPO BETAMETHASONE',
+                        productItem.goodName,
                         style: GoogleFonts.getFont('Prompt',
-                            color: const Color.fromARGB(243, 0, 0, 0),
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600),
+                            color: const Color.fromARGB(243, 0, 0, 0), fontSize: 14, fontWeight: FontWeight.w600),
                       ),
                       Padding(
-                        padding: const EdgeInsetsDirectional.fromSTEB(
-                            0, 8, 0, 0),
+                        padding: const EdgeInsetsDirectional.fromSTEB(0, 8, 0, 0),
                         child: Row(
                           mainAxisSize: MainAxisSize.max,
                           children: [
@@ -207,25 +209,18 @@ class ProductBox_Wedget extends StatelessWidget {
                               size: 16,
                             ),
                             Padding(
-                              padding: const EdgeInsetsDirectional
-                                  .fromSTEB(4, 0, 0, 0),
+                              padding: const EdgeInsetsDirectional.fromSTEB(4, 0, 0, 0),
                               child: Text(
-                                '555555',
-                                style: GoogleFonts.getFont(
-                                    'Prompt',
-                                    color: const Color.fromARGB(
-                                        243, 82, 82, 82),
-                                    fontSize: 16,
-                                    fontWeight:
-                                        FontWeight.w600),
+                                productItem.barcode,
+                                style: GoogleFonts.getFont('Prompt',
+                                    color: const Color.fromARGB(243, 82, 82, 82), fontSize: 16, fontWeight: FontWeight.w600),
                               ),
                             ),
                           ],
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsetsDirectional.fromSTEB(
-                            0, 4, 0, 0),
+                        padding: const EdgeInsetsDirectional.fromSTEB(0, 4, 0, 0),
                         child: Row(
                           mainAxisSize: MainAxisSize.max,
                           children: [
@@ -235,17 +230,11 @@ class ProductBox_Wedget extends StatelessWidget {
                               size: 16,
                             ),
                             Padding(
-                              padding: const EdgeInsetsDirectional
-                                  .fromSTEB(4, 0, 0, 0),
+                              padding: const EdgeInsetsDirectional.fromSTEB(4, 0, 0, 0),
                               child: Text(
-                                '3,000 บาท',
-                                style: GoogleFonts.getFont(
-                                    'Prompt',
-                                    color: const Color.fromARGB(
-                                        243, 66, 66, 66),
-                                    fontSize: 22,
-                                    fontWeight:
-                                        FontWeight.w600),
+                                productItem.price.toStringAsFixed(2),
+                                style: GoogleFonts.getFont('Prompt',
+                                    color: const Color.fromARGB(243, 66, 66, 66), fontSize: 22, fontWeight: FontWeight.w600),
                               ),
                             ),
                           ],
